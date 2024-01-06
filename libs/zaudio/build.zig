@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     zaudio: *std.Build.Module,
-    zaudio_c_cpp: *std.Build.CompileStep,
+    zaudio_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zaudio_c_cpp);
         exe.addModule("zaudio", pkg.zaudio);
     }
@@ -12,12 +12,12 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     _: struct {},
 ) Package {
     const zaudio = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zaudio.zig" },
+        .root_source_file = .{ .path = thisDir() ++ "/src/zaudio.zig" },
     });
 
     const zaudio_c_cpp = b.addStaticLibrary(.{
@@ -81,7 +81,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const tests = b.addTest(.{
         .name = "zaudio-tests",

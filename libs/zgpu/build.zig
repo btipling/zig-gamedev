@@ -19,7 +19,7 @@ pub const Package = struct {
     zgpu: *std.Build.Module,
     zgpu_options: *std.Build.Module,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         const target = (std.zig.system.NativeTargetInfo.detect(exe.target) catch unreachable).target;
 
         exe.addModule("zgpu", pkg.zgpu);
@@ -89,7 +89,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    _: std.zig.CrossTarget,
+    _: std.Build.ResolvedTarget,
     _: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -115,8 +115,8 @@ pub fn package(
     const zgpu_options = step.createModule();
 
     const zgpu = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zgpu.zig" },
-        .dependencies = &.{
+        .root_source_file = .{ .path = thisDir() ++ "/src/zgpu.zig" },
+        .imports = &.{
             .{ .name = "zgpu_options", .module = zgpu_options },
             .{ .name = "zglfw", .module = args.deps.zglfw },
             .{ .name = "zpool", .module = args.deps.zpool },

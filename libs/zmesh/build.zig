@@ -9,9 +9,9 @@ pub const Package = struct {
     options: Options,
     zmesh: *std.Build.Module,
     zmesh_options: *std.Build.Module,
-    zmesh_c_cpp: *std.Build.CompileStep,
+    zmesh_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zmesh_c_cpp);
         exe.addModule("zmesh", pkg.zmesh);
         exe.addModule("zmesh_options", pkg.zmesh_options);
@@ -20,7 +20,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -33,8 +33,8 @@ pub fn package(
     const zmesh_options = step.createModule();
 
     const zmesh = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/main.zig" },
-        .dependencies = &.{
+        .root_source_file = .{ .path = thisDir() ++ "/src/main.zig" },
+        .imports = &.{
             .{ .name = "zmesh_options", .module = zmesh_options },
         },
     });
@@ -115,7 +115,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const tests = b.addTest(.{
         .name = "zmesh-tests",

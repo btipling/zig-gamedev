@@ -52,7 +52,7 @@ we provide pre-compiled binaries for most popular platforms.
 .{
     .name = "your_project_name",
     .version = "0.1.0",
-    .dependencies = .{
+    .imports= .{
         .dawn_x86_64_windows_gnu = .{
             .url = "https://github.com/michal-z/webgpu_dawn-x86_64-windows-gnu/archive/d3a68014e6b6b53fd330a0ccba99e4dcfffddae5.tar.gz",
             .hash = "1220f9448cde02ef3cd51bde2e0850d4489daa0541571d748154e89c6eb46c76a267",

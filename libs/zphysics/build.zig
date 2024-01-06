@@ -11,9 +11,9 @@ pub const Package = struct {
     options: Options,
     zphysics: *std.Build.Module,
     zphysics_options: *std.Build.Module,
-    zphysics_c_cpp: *std.Build.CompileStep,
+    zphysics_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addIncludePath(.{ .path = thisDir() ++ "/libs/JoltC" });
         exe.linkLibrary(pkg.zphysics_c_cpp);
         exe.addModule("zphysics", pkg.zphysics);
@@ -23,7 +23,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -38,8 +38,8 @@ pub fn package(
     const zphysics_options = step.createModule();
 
     const zphysics = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zphysics.zig" },
-        .dependencies = &.{
+        .root_source_file = .{ .path = thisDir() ++ "/src/zphysics.zig" },
+        .imports = &.{
             .{ .name = "zphysics_options", .module = zphysics_options },
         },
     });
@@ -226,7 +226,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const parent_step = b.allocator.create(std.Build.Step) catch @panic("OOM");
     parent_step.* = std.Build.Step.init(.{ .id = .custom, .name = "zphysics-tests", .owner = b });
@@ -250,7 +250,7 @@ fn testStep(
     b: *std.Build,
     name: []const u8,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     options: Options,
 ) *std.Build.RunStep {
     const test_exe = b.addTest(.{

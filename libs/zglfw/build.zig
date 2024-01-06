@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     zglfw: *std.Build.Module,
-    zglfw_c_cpp: *std.Build.CompileStep,
+    zglfw_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addModule("zglfw", pkg.zglfw);
 
         const host = (std.zig.system.NativeTargetInfo.detect(exe.target) catch unreachable).target;
@@ -40,7 +40,7 @@ pub const Options = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -50,7 +50,7 @@ pub fn package(
     step.addOption(bool, "shared", args.options.shared);
 
     const zglfw = b.addModule("zglfw", .{
-        .source_file = .{ .path = thisDir() ++ "/src/zglfw.zig" },
+        .root_source_file = .{ .path = thisDir() ++ "/src/zglfw.zig" },
     });
 
     const zglfw_c_cpp = if (args.options.shared) blk: {
@@ -60,7 +60,7 @@ pub fn package(
             .optimize = optimize,
         });
 
-        if (target.isWindows()) {
+        if (target.result.os.tag == .windows) {
             lib.defineCMacro("_GLFW_BUILD_DLL", null);
         }
 
@@ -74,7 +74,12 @@ pub fn package(
     zglfw_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/glfw/include" });
     zglfw_c_cpp.linkLibC();
 
-    const host = (std.zig.system.NativeTargetInfo.detect(zglfw_c_cpp.target) catch unreachable).target;
+    const detected = try std.zig.system.NativeTargetInfo.detect(.{});
+    const host: std.Build.ResolvedTarget = .{
+        .query = .{},
+        .target = detected.target,
+        .dynamic_linker = detected.dynamic_linker,
+    };
 
     const src_dir = thisDir() ++ "/libs/glfw/src/";
 
@@ -192,7 +197,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const tests = b.addTest(.{
         .name = "zglfw-tests",

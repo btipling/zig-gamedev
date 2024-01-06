@@ -6,7 +6,7 @@ const demo_name = "instanced_pills_wgpu";
 const demo_filename = "instanced_pills_wgpu";
 const content_dir = demo_name ++ "_content/";
 
-pub fn build(b: *std.Build, options: Options) *std.Build.CompileStep {
+pub fn build(b: *std.Build, options: Options) *std.Build.Step.Compile {
     const exe = b.addExecutable(.{
         .name = demo_name,
         .root_source_file = .{ .path = thisDir() ++ "/src/" ++ demo_filename ++ ".zig" },

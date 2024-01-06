@@ -17,7 +17,7 @@ pub const Package = struct {
     zsdl_options: *std.Build.Module,
     install: *std.Build.Step,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibC();
 
         exe.addModule("zsdl", pkg.zsdl);
@@ -95,7 +95,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     _: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -110,8 +110,8 @@ pub fn package(
     const options = options_step.createModule();
 
     const zsdl = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zsdl.zig" },
-        .dependencies = &.{
+        .root_source_file = .{ .path = thisDir() ++ "/src/zsdl.zig" },
+        .imports = &.{
             .{ .name = "zsdl_options", .module = options },
         },
     });
@@ -203,7 +203,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     api_version: ApiVersion,
 ) *std.Build.Step {
     const tests = b.addTest(.{

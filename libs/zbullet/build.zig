@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     zbullet: *std.Build.Module,
-    zbullet_c_cpp: *std.Build.CompileStep,
+    zbullet_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zbullet_c_cpp);
         exe.addModule("zbullet", pkg.zbullet);
     }
@@ -12,12 +12,12 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     _: struct {},
 ) Package {
     const zbullet = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zbullet.zig" },
+        .root_source_file = .{ .path = thisDir() ++ "/src/zbullet.zig" },
     });
 
     const zbullet_c_cpp = b.addStaticLibrary(.{

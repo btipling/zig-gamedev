@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     znoise: *std.Build.Module,
-    znoise_c_cpp: *std.Build.CompileStep,
+    znoise_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addModule("znoise", pkg.znoise);
         exe.linkLibrary(pkg.znoise_c_cpp);
     }
@@ -12,12 +12,12 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     _: struct {},
 ) Package {
     const znoise = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/znoise.zig" },
+        .root_source_file = .{ .path = thisDir() ++ "/src/znoise.zig" },
     });
 
     const znoise_c_cpp = b.addStaticLibrary(.{
@@ -49,7 +49,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const tests = b.addTest(.{
         .name = "znoise-tests",

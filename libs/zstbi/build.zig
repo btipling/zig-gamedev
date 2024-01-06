@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     zstbi: *std.Build.Module,
-    zstbi_c_cpp: *std.Build.CompileStep,
+    zstbi_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zstbi_c_cpp);
         exe.addModule("zstbi", pkg.zstbi);
     }
@@ -12,12 +12,12 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     _: struct {},
 ) Package {
     const zstbi = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/zstbi.zig" },
+        .root_source_file = .{ .path = thisDir() ++ "/src/zstbi.zig" },
     });
 
     const zstbi_c_cpp = b.addStaticLibrary(.{
@@ -64,7 +64,7 @@ pub fn build(b: *std.Build) void {
 pub fn runTests(
     b: *std.Build,
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 ) *std.Build.Step {
     const tests = b.addTest(.{
         .name = "zstbi-tests",

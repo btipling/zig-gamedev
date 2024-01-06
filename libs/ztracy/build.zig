@@ -9,9 +9,9 @@ pub const Package = struct {
     options: Options,
     ztracy: *std.Build.Module,
     ztracy_options: *std.Build.Module,
-    ztracy_c_cpp: *std.Build.CompileStep,
+    ztracy_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addModule("ztracy", pkg.ztracy);
         exe.addModule("ztracy_options", pkg.ztracy_options);
         if (pkg.options.enable_ztracy) {
@@ -23,7 +23,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     args: struct {
         options: Options = .{},
@@ -35,8 +35,8 @@ pub fn package(
     const ztracy_options = step.createModule();
 
     const ztracy = b.createModule(.{
-        .source_file = .{ .path = thisDir() ++ "/src/ztracy.zig" },
-        .dependencies = &.{
+        .root_source_file = .{ .path = thisDir() ++ "/src/ztracy.zig" },
+        .imports = &.{
             .{ .name = "ztracy_options", .module = ztracy_options },
         },
     });

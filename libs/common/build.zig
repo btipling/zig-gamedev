@@ -2,9 +2,9 @@ const std = @import("std");
 
 pub const Package = struct {
     common: *std.Build.Module,
-    common_c_cpp: *std.Build.CompileStep,
+    common_c_cpp: *std.Build.Step.Compile,
 
-    pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
+    pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addModule("common", pkg.common);
         exe.linkLibrary(pkg.common_c_cpp);
         exe.addIncludePath(.{ .path = thisDir() ++ "/libs/imgui" });
@@ -14,7 +14,7 @@ pub const Package = struct {
 
 pub fn package(
     b: *std.Build,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.Mode,
     args: struct {
         deps: struct {
@@ -48,8 +48,8 @@ pub fn package(
 
     return .{
         .common = b.createModule(.{
-            .source_file = .{ .path = thisDir() ++ "/src/common.zig" },
-            .dependencies = &.{
+            .root_source_file = .{ .path = thisDir() ++ "/src/common.zig" },
+            .imports = &.{
                 .{ .name = "zwin32", .module = args.deps.zwin32 },
                 .{ .name = "zd3d12", .module = args.deps.zd3d12 },
             },

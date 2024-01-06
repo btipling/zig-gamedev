@@ -3,7 +3,7 @@ const std = @import("std");
 const Options = @import("../../build.zig").Options;
 const content_dir = "triangle_content/";
 
-pub fn build(b: *std.Build, options: Options) *std.Build.CompileStep {
+pub fn build(b: *std.Build, options: Options) *std.Build.Step.Compile {
     const exe = b.addExecutable(.{
         .name = "triangle",
         .root_source_file = .{ .path = thisDir() ++ "/src/triangle.zig" },

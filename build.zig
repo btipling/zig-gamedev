@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) void {
         ) orelse false,
         .zpix_enable = b.option(bool, "zpix-enable", "Enable PIX for Windows profiler") orelse false,
     };
-    ensureTarget(options.target) catch return;
+    ensureTarget(options.target.result) catch return;
     ensureGit(b.allocator) catch return;
     ensureGitLfs(b.allocator, "install") catch return;
     ensureGitLfs(b.allocator, "pull") catch return;
@@ -34,7 +34,7 @@ pub fn build(b: *std.Build) void {
     //
     packagesCrossPlatform(b, options);
 
-    if (options.target.isWindows() and
+    if (options.target.result.os.tag == .windows and
         (builtin.target.os.tag == .windows or builtin.target.os.tag == .linux))
     {
         packagesWindowsLinux(b, options);
@@ -49,7 +49,7 @@ pub fn build(b: *std.Build) void {
     //
     samplesCrossPlatform(b, options);
 
-    if (options.target.isWindows() and
+    if (options.target.result.os.tag == .windows and
         (builtin.target.os.tag == .windows or builtin.target.os.tag == .linux))
     {
         samplesWindowsLinux(b, options);
@@ -102,8 +102,8 @@ fn packagesCrossPlatform(b: *std.Build, options: Options) void {
     });
     ztracy_pkg = ztracy.package(b, target, optimize, .{
         .options = .{
-            .enable_ztracy = !target.isDarwin(), // TODO: ztracy fails to compile on macOS.
-            .enable_fibers = !target.isDarwin(),
+            .enable_ztracy = !target.result.os.tag.isDarwin(), // TODO: ztracy fails to compile on macOS.
+            .enable_fibers = !target.result.os.tag.isDarwin(),
         },
     });
     zphysics_pkg = zphysics.package(b, target, optimize, .{});
@@ -296,7 +296,7 @@ const zflecs = @import("libs/zflecs/build.zig");
 
 pub const Options = struct {
     optimize: std.builtin.Mode,
-    target: std.zig.CrossTarget,
+    target: std.Build.ResolvedTarget,
 
     zd3d12_enable_debug_layer: bool,
     zd3d12_enable_gbv: bool,
@@ -304,7 +304,7 @@ pub const Options = struct {
     zpix_enable: bool,
 };
 
-fn install(b: *std.Build, exe: *std.Build.CompileStep, comptime name: []const u8) void {
+fn install(b: *std.Build, exe: *std.Build.Step.Compile, comptime name: []const u8) void {
     // TODO: Problems with LTO on Windows.
     exe.want_lto = false;
     if (exe.optimize == .ReleaseFast)
@@ -348,9 +348,7 @@ fn ensureZigVersion() !void {
     }
 }
 
-fn ensureTarget(cross: std.zig.CrossTarget) !void {
-    const target = (std.zig.system.NativeTargetInfo.detect(cross) catch unreachable).target;
-
+fn ensureTarget(target: std.Target) !void {
     const supported = switch (target.os.tag) {
         .windows => target.cpu.arch.isX86() and target.abi.isGnu(),
         .linux => (target.cpu.arch.isX86() or target.cpu.arch.isAARCH64()) and target.abi.isGnu(),
