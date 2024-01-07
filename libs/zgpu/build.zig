@@ -20,14 +20,14 @@ pub const Package = struct {
     zgpu_options: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        const target = (std.zig.system.NativeTargetInfo.detect(exe.target) catch unreachable).target;
+        const target = (exe.root_module.resolved_target orelse unreachable).result;
 
-        exe.addModule("zgpu", pkg.zgpu);
-        exe.addModule("zgpu_options", pkg.zgpu_options);
+        exe.root_module.addImport("zgpu", pkg.zgpu);
+        exe.root_module.addImport("zgpu_options", pkg.zgpu_options);
 
         const b = exe.step.owner;
 
-        switch (target.result.os.tag) {
+        switch (target.os.tag) {
             .windows => {
                 const dawn_dep = b.dependency("dawn_x86_64_windows_gnu", .{});
                 exe.addLibraryPath(.{ .path = dawn_dep.builder.build_root.path.? });

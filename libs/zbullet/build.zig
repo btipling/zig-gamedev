@@ -6,7 +6,7 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zbullet_c_cpp);
-        exe.addModule("zbullet", pkg.zbullet);
+        exe.root_module.addImport("zbullet", pkg.zbullet);
     }
 };
 

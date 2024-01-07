@@ -6,7 +6,7 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zaudio_c_cpp);
-        exe.addModule("zaudio", pkg.zaudio);
+        exe.root_module.addImport("zaudio", pkg.zaudio);
     }
 };
 
@@ -29,7 +29,7 @@ pub fn package(
     zaudio_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/miniaudio" });
     zaudio_c_cpp.linkLibC();
 
-    const host = (std.zig.system.NativeTargetInfo.detect(zaudio_c_cpp.target) catch unreachable).target;
+    const host = (zaudio_c_cpp.root_module.resolved_target orelse unreachable).result;
 
     if (host.os.tag == .macos) {
         zaudio_c_cpp.addFrameworkPath(.{ .path = thisDir() ++ "/../system-sdk/macos12/System/Library/Frameworks" });

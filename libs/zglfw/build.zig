@@ -5,9 +5,9 @@ pub const Package = struct {
     zglfw_c_cpp: *std.Build.Step.Compile,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zglfw", pkg.zglfw);
+        exe.root_module.addImport("zglfw", pkg.zglfw);
 
-        const host = (std.zig.system.NativeTargetInfo.detect(exe.target) catch unreachable).target;
+        const host = (exe.root_module.resolved_target orelse unreachable).result;
 
         switch (host.os.tag) {
             .windows => {},
@@ -23,9 +23,9 @@ pub const Package = struct {
                 }
             },
         }
-
         if (pkg.zglfw_c_cpp.linkage) |linkage| {
-            if (exe.target.isWindows() and linkage == .dynamic) {
+            const exeHost = (exe.root_module.resolved_target orelse unreachable).result;
+            if (exeHost.os.tag == .windows and linkage == .dynamic) {
                 exe.defineCMacro("GLFW_DLL", null);
             }
         }

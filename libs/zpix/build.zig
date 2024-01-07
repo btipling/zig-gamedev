@@ -10,8 +10,8 @@ pub const Package = struct {
     zpix_options: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zpix", pkg.zpix);
-        exe.addModule("zpix_options", pkg.zpix_options);
+        exe.root_module.addImport("zpix", pkg.zpix);
+        exe.root_module.addImport("zpix_options", pkg.zpix_options);
     }
 };
 

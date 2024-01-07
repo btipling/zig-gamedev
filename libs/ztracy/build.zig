@@ -12,8 +12,8 @@ pub const Package = struct {
     ztracy_c_cpp: *std.Build.Step.Compile,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("ztracy", pkg.ztracy);
-        exe.addModule("ztracy_options", pkg.ztracy_options);
+        exe.root_module.addImport("ztracy", pkg.ztracy);
+        exe.root_module.addImport("ztracy_options", pkg.ztracy_options);
         if (pkg.options.enable_ztracy) {
             exe.addIncludePath(.{ .path = thisDir() ++ "/libs/tracy/tracy" });
             exe.linkLibrary(pkg.ztracy_c_cpp);
@@ -63,12 +63,12 @@ pub fn package(
             },
         });
 
-        const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+        const abi = target.result.abi;
         ztracy_c_cpp.linkLibC();
         if (abi != .msvc)
             ztracy_c_cpp.linkLibCpp();
 
-        switch (target.getOs().tag) {
+        switch (target.result.os.tag) {
             .windows => {
                 ztracy_c_cpp.root_module.linkSystemLibrary("ws2_32", .{});
                 ztracy_c_cpp.root_module.linkSystemLibrary("dbghelp", .{});

@@ -24,7 +24,7 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zgui_c_cpp);
-        exe.addModule("zgui", pkg.zgui);
+        exe.root_module.addImport("zgui", pkg.zgui);
     }
 };
 
@@ -77,7 +77,7 @@ pub fn package(
     zgui_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs" });
     zgui_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/imgui" });
 
-    const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+    const abi = target.result.abi;
     zgui_c_cpp.linkLibC();
     if (abi != .msvc)
         zgui_c_cpp.linkLibCpp();
@@ -181,7 +181,7 @@ pub fn runTests(
     const zgui_pkg = package(b, target, optimize, .{
         .options = .{ .backend = .no_backend },
     });
-    gui_tests.addModule("zgui_options", zgui_pkg.zgui_options);
+    gui_tests.root_module.addImport("zgui_options", zgui_pkg.zgui_options);
     zgui_pkg.link(gui_tests);
 
     return &b.addRunArtifact(gui_tests).step;

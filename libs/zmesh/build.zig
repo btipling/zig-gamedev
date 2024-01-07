@@ -13,8 +13,8 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zmesh_c_cpp);
-        exe.addModule("zmesh", pkg.zmesh);
-        exe.addModule("zmesh_options", pkg.zmesh_options);
+        exe.root_module.addImport("zmesh", pkg.zmesh);
+        exe.root_module.addImport("zmesh_options", pkg.zmesh_options);
     }
 };
 
@@ -59,7 +59,7 @@ pub fn package(
         .optimize = optimize,
     });
 
-    const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+    const abi = target.result.abi;
     zmesh_c_cpp.linkLibC();
     if (abi != .msvc)
         zmesh_c_cpp.linkLibCpp();

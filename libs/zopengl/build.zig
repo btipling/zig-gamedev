@@ -15,7 +15,7 @@ pub const Package = struct {
     zopengl_options: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zopengl", pkg.zopengl);
+        exe.root_module.addImport("zopengl", pkg.zopengl);
     }
 };
 
@@ -67,7 +67,7 @@ pub fn runTests(
             .api = .wrapper,
         },
     });
-    tests.addModule("zopengl_options", zopengl_pkg.zopengl_options);
+    tests.root_module.addImport("zopengl_options", zopengl_pkg.zopengl_options);
     zopengl_pkg.link(tests);
 
     return &b.addRunArtifact(tests).step;

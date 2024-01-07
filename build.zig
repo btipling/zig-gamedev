@@ -307,8 +307,8 @@ pub const Options = struct {
 fn install(b: *std.Build, exe: *std.Build.Step.Compile, comptime name: []const u8) void {
     // TODO: Problems with LTO on Windows.
     exe.want_lto = false;
-    if (exe.optimize == .ReleaseFast)
-        exe.strip = true;
+    if (exe.root_module.optimize == .ReleaseFast)
+        exe.root_module.strip = true;
 
     //comptime var desc_name: [256]u8 = [_]u8{0} ** 256;
     //comptime _ = std.mem.replace(u8, name, "", "", desc_name[0..]);

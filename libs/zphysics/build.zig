@@ -16,8 +16,8 @@ pub const Package = struct {
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.addIncludePath(.{ .path = thisDir() ++ "/libs/JoltC" });
         exe.linkLibrary(pkg.zphysics_c_cpp);
-        exe.addModule("zphysics", pkg.zphysics);
-        exe.addModule("zphysics_options", pkg.zphysics_options);
+        exe.root_module.addImport("zphysics", pkg.zphysics);
+        exe.root_module.addImport("zphysics_options", pkg.zphysics_options);
     }
 };
 
@@ -50,7 +50,7 @@ pub fn package(
         .optimize = optimize,
     });
 
-    const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+    const abi = target.result.abi;
 
     zphysics_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs" });
     zphysics_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/JoltC" });
@@ -64,7 +64,7 @@ pub fn package(
         if (args.options.enable_cross_platform_determinism) "-DJPH_CROSS_PLATFORM_DETERMINISTIC" else "",
         if (args.options.enable_debug_renderer) "-DJPH_DEBUG_RENDERER" else "",
         if (args.options.use_double_precision) "-DJPH_DOUBLE_PRECISION" else "",
-        if (args.options.enable_asserts or zphysics_c_cpp.optimize == .Debug) "-DJPH_ENABLE_ASSERTS" else "",
+        if (args.options.enable_asserts or zphysics_c_cpp.root_module.optimize == .Debug) "-DJPH_ENABLE_ASSERTS" else "",
         "-fno-sanitize=undefined",
     };
 
@@ -252,7 +252,7 @@ fn testStep(
     optimize: std.builtin.Mode,
     target: std.Build.ResolvedTarget,
     options: Options,
-) *std.Build.RunStep {
+) *std.Build.Step.Run {
     const test_exe = b.addTest(.{
         .name = name,
         .root_source_file = .{ .path = thisDir() ++ "/src/zphysics.zig" },
@@ -263,7 +263,7 @@ fn testStep(
     // TODO: Problems with LTO on Windows.
     test_exe.want_lto = false;
 
-    const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+    const abi = target.result.abi;
 
     test_exe.addCSourceFile(.{
         .file = .{ .path = thisDir() ++ "/libs/JoltC/JoltPhysicsC_Tests.c" },
@@ -281,7 +281,7 @@ fn testStep(
     const zphysics_pkg = package(b, target, optimize, .{ .options = options });
     zphysics_pkg.link(test_exe);
 
-    test_exe.addModule("zphysics_options", zphysics_pkg.zphysics_options);
+    test_exe.root_module.addImport("zphysics_options", zphysics_pkg.zphysics_options);
 
     return b.addRunArtifact(test_exe);
 }

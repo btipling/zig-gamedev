@@ -10,8 +10,8 @@ pub const Package = struct {
     zmath_options: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zmath", pkg.zmath);
-        exe.addModule("zmath_options", pkg.zmath_options);
+        exe.root_module.addImport("zmath", pkg.zmath);
+        exe.root_module.addImport("zmath_options", pkg.zmath_options);
     }
 };
 
@@ -74,7 +74,7 @@ pub fn runTests(
     });
 
     const zmath_pkg = package(b, target, optimize, .{});
-    tests.addModule("zmath_options", zmath_pkg.zmath_options);
+    tests.root_module.addImport("zmath_options", zmath_pkg.zmath_options);
 
     return &b.addRunArtifact(tests).step;
 }
@@ -91,7 +91,7 @@ pub fn runBenchmarks(
     });
 
     const zmath_pkg = package(b, target, .ReleaseFast, .{});
-    exe.addModule("zmath", zmath_pkg.zmath);
+    exe.root_module.addImport("zmath", zmath_pkg.zmath);
 
     return &b.addRunArtifact(exe).step;
 }

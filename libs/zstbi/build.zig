@@ -6,7 +6,7 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibrary(pkg.zstbi_c_cpp);
-        exe.addModule("zstbi", pkg.zstbi);
+        exe.root_module.addImport("zstbi", pkg.zstbi);
     }
 };
 

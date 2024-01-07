@@ -11,7 +11,7 @@ pub fn build(b: *std.Build, options: Options) void {
 }
 
 fn install(
-    b: *std.build.Builder,
+    b: *std.Build,
     optimize: std.builtin.Mode,
     target: std.Build.ResolvedTarget,
     comptime name: []const u8,
@@ -51,8 +51,8 @@ fn install(
         .optimize = optimize,
     });
     exe.rdynamic = true;
-    exe.addModule("xcommon", xcommon);
-    exe.addModule("ximpl", ximpl);
+    exe.root_module.addImport("xcommon", xcommon);
+    exe.root_module.addImport("ximpl", ximpl);
     zsdl_pkg.link(exe);
     zopengl_pkg.link(exe);
     zstbi_pkg.link(exe);

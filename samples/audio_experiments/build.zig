@@ -24,7 +24,7 @@ pub fn build(b: *std.Build, options: Options) *std.Build.Step.Compile {
     zxaudio2_pkg.link(exe);
 
     const exe_options = b.addOptions();
-    exe.addOptions("build_options", exe_options);
+    exe.root_module.addOptions("build_options", exe_options);
     exe_options.addOption([]const u8, "content_dir", content_dir);
 
     const dxc_step = buildShaders(b);

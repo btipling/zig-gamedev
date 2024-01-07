@@ -5,7 +5,7 @@ pub const Package = struct {
     znoise_c_cpp: *std.Build.Step.Compile,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("znoise", pkg.znoise);
+        exe.root_module.addImport("znoise", pkg.znoise);
         exe.linkLibrary(pkg.znoise_c_cpp);
     }
 };

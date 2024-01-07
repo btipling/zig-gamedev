@@ -20,11 +20,11 @@ pub const Package = struct {
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
         exe.linkLibC();
 
-        exe.addModule("zsdl", pkg.zsdl);
+        exe.root_module.addImport("zsdl", pkg.zsdl);
 
         exe.step.dependOn(pkg.install);
 
-        const target = (std.zig.system.NativeTargetInfo.detect(exe.target) catch unreachable).target;
+        const target = (exe.root_module.resolved_target orelse unreachable).result;
 
         switch (target.os.tag) {
             .windows => {
@@ -218,7 +218,7 @@ pub fn runTests(
             .enable_ttf = true,
         },
     });
-    tests.addModule("zsdl_options", zsdl_pkg.zsdl_options);
+    tests.root_module.addImport("zsdl_options", zsdl_pkg.zsdl_options);
     zsdl_pkg.link(tests);
     return &b.addRunArtifact(tests).step;
 }

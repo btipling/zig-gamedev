@@ -5,7 +5,7 @@ pub const Package = struct {
     common_c_cpp: *std.Build.Step.Compile,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("common", pkg.common);
+        exe.root_module.addImport("common", pkg.common);
         exe.linkLibrary(pkg.common_c_cpp);
         exe.addIncludePath(.{ .path = thisDir() ++ "/libs/imgui" });
         exe.addIncludePath(.{ .path = thisDir() ++ "/../zmesh/libs/cgltf" });
@@ -29,11 +29,11 @@ pub fn package(
         .optimize = optimize,
     });
 
-    const abi = (std.zig.system.NativeTargetInfo.detect(target) catch unreachable).target.abi;
+    const abi = target.result.abi;
     lib.linkLibC();
     if (abi != .msvc)
         lib.linkLibCpp();
-    lib.root_module.linkSystemLibrar("imm32", .{});
+    lib.root_module.linkSystemLibrary("imm32", .{});
 
     lib.addIncludePath(.{ .path = thisDir() ++ "/libs" });
     lib.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/imgui/imgui.cpp" }, .flags = &.{""} });

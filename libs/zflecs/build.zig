@@ -5,7 +5,7 @@ pub const Package = struct {
     zflecs_c_cpp: *std.Build.Step.Compile,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zflecs", pkg.zflecs);
+        exe.root_module.addImport("zflecs", pkg.zflecs);
         exe.addIncludePath(.{ .path = thisDir() ++ "/libs/flecs" });
         exe.linkLibrary(pkg.zflecs_c_cpp);
     }
@@ -37,8 +37,7 @@ pub fn package(
             if (@import("builtin").mode == .Debug) "-DFLECS_SANITIZE" else "",
         },
     });
-
-    if (zflecs_c_cpp.target.os.tag == .windows) {
+    if ((zflecs_c_cpp.root_module.resolved_target orelse unreachable).result.os.tag == .windows) {
         zflecs_c_cpp.root_module.linkSystemLibrary("ws2_32", .{});
     }
 

@@ -4,7 +4,7 @@ pub const Package = struct {
     zpool: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zpool", pkg.zpool);
+        exe.root_module.addImport("zpool", pkg.zpool);
     }
 };
 

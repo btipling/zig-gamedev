@@ -4,7 +4,7 @@ pub const Package = struct {
     zjobs: *std.Build.Module,
 
     pub fn link(pkg: Package, exe: *std.Build.Step.Compile) void {
-        exe.addModule("zjobs", pkg.zjobs);
+        exe.root_module.addImport("zjobs", pkg.zjobs);
     }
 };
 
