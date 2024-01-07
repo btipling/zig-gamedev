@@ -34,10 +34,10 @@ pub const Package = struct {
 
                 switch (pkg.options.api_version) {
                     .sdl2 => {
-                        exe.linkSystemLibraryName("SDL2");
-                        exe.linkSystemLibraryName("SDL2main");
+                        exe.root_module.linkSystemLibrary("SDL2", .{});
+                        exe.root_module.linkSystemLibrary("SDL2main", .{});
                         if (pkg.options.enable_ttf) {
-                            exe.linkSystemLibraryName("SDL2_ttf");
+                            exe.root_module.linkSystemLibrary("SDL2_ttf", .{});
                         }
                     },
                     .sdl3 => {
@@ -54,9 +54,9 @@ pub const Package = struct {
 
                 switch (pkg.options.api_version) {
                     .sdl2 => {
-                        exe.linkSystemLibraryName("SDL2-2.0");
+                        exe.root_module.linkSystemLibrary("SDL2-2.0", .{});
                         if (pkg.options.enable_ttf) {
-                            exe.linkSystemLibraryName("SDL2_ttf-2.0");
+                            exe.root_module.linkSystemLibrary("SDL2_ttf-2.0", .{});
                         }
                     },
                     .sdl3 => {
@@ -80,7 +80,7 @@ pub const Package = struct {
                         // TODO: bundle SDL3.framework instead of this hack
                         // exe.linkFramework("SDL3");
                         exe.addLibraryPath(.{ .path = "/usr/local/lib" });
-                        exe.linkSystemLibraryName("SDL3");
+                        exe.root_module.linkSystemLibrary("SDL3", .{});
 
                         if (pkg.options.enable_ttf) {
                             exe.linkFramework("SDL2_ttf");
@@ -119,7 +119,7 @@ pub fn package(
     const install_step = b.allocator.create(std.Build.Step) catch @panic("OOM");
     install_step.* = std.Build.Step.init(.{ .id = .custom, .name = "zsdl-install", .owner = b });
 
-    if (target.isWindows()) {
+    if (target.result.os.tag == .windows) {
         switch (args.options.api_version) {
             .sdl2 => {
                 install_step.dependOn(
@@ -139,7 +139,7 @@ pub fn package(
             },
             .sdl3 => {},
         }
-    } else if (target.isLinux()) {
+    } else if (target.result.os.tag == .linux) {
         switch (args.options.api_version) {
             .sdl2 => {
                 install_step.dependOn(
@@ -159,7 +159,7 @@ pub fn package(
             },
             .sdl3 => {},
         }
-    } else if (target.isDarwin()) {
+    } else if (target.result.os.tag.isDarwin()) {
         switch (args.options.api_version) {
             .sdl2 => {
                 install_step.dependOn(

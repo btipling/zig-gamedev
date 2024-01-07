@@ -46,7 +46,7 @@ pub fn package(
             .optimize = optimize,
         });
 
-        if (target.isWindows()) {
+        if (target.result.os.tag == .windows) {
             lib.defineCMacro("CGLTF_API", "__declspec(dllexport)");
             lib.defineCMacro("MESHOPTIMIZER_API", "__declspec(dllexport)");
             lib.defineCMacro("ZMESH_API", "__declspec(dllexport)");

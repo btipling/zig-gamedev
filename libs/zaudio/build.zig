@@ -40,9 +40,9 @@ pub fn package(
         zaudio_c_cpp.linkFramework("AudioUnit");
         zaudio_c_cpp.linkFramework("AudioToolbox");
     } else if (host.os.tag == .linux) {
-        zaudio_c_cpp.linkSystemLibraryName("pthread");
-        zaudio_c_cpp.linkSystemLibraryName("m");
-        zaudio_c_cpp.linkSystemLibraryName("dl");
+        zaudio_c_cpp.root_module.linkSystemLibrary("pthread", .{});
+        zaudio_c_cpp.root_module.linkSystemLibrary("m", .{});
+        zaudio_c_cpp.root_module.linkSystemLibrary("dl", .{});
     }
 
     zaudio_c_cpp.addCSourceFile(.{

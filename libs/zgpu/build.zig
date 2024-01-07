@@ -27,14 +27,14 @@ pub const Package = struct {
 
         const b = exe.step.owner;
 
-        switch (target.os.tag) {
+        switch (target.result.os.tag) {
             .windows => {
                 const dawn_dep = b.dependency("dawn_x86_64_windows_gnu", .{});
                 exe.addLibraryPath(.{ .path = dawn_dep.builder.build_root.path.? });
                 exe.addLibraryPath(.{ .path = thisDir() ++ "/../system-sdk/windows/lib/x86_64-windows-gnu" });
 
-                exe.linkSystemLibraryName("ole32");
-                exe.linkSystemLibraryName("dxguid");
+                exe.root_module.linkSystemLibrary("ole32", .{});
+                exe.root_module.linkSystemLibrary("dxguid", .{});
             },
             .linux => {
                 if (target.cpu.arch.isX86()) {
@@ -58,7 +58,7 @@ pub const Package = struct {
                     exe.addLibraryPath(.{ .path = dawn_dep.builder.build_root.path.? });
                 }
 
-                exe.linkSystemLibraryName("objc");
+                exe.root_module.linkSystemLibrary("objc", .{});
                 exe.linkFramework("Metal");
                 exe.linkFramework("CoreGraphics");
                 exe.linkFramework("Foundation");
@@ -69,7 +69,7 @@ pub const Package = struct {
             else => unreachable,
         }
 
-        exe.linkSystemLibraryName("dawn");
+        exe.root_module.linkSystemLibrary("dawn", .{});
         exe.linkLibC();
         exe.linkLibCpp();
 

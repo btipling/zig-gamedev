@@ -57,13 +57,13 @@ pub fn package(
         });
 
         b.installArtifact(lib);
-        if (target.isWindows()) {
+        if (target.result.os.tag == .windows) {
             lib.defineCMacro("IMGUI_API", "__declspec(dllexport)");
             lib.defineCMacro("IMPLOT_API", "__declspec(dllexport)");
             lib.defineCMacro("ZGUI_API", "__declspec(dllexport)");
         }
 
-        if (target.isDarwin()) {
+        if (target.result.os.tag.isDarwin()) {
             lib.linker_allow_shlib_undefined = true;
         }
 
@@ -144,8 +144,8 @@ pub fn package(
                 },
                 .flags = cflags,
             });
-            zgui_c_cpp.linkSystemLibraryName("d3dcompiler_47");
-            zgui_c_cpp.linkSystemLibraryName("dwmapi");
+            zgui_c_cpp.root_module.linkSystemLibrary("d3dcompiler_47", .{});
+            zgui_c_cpp.root_module.linkSystemLibrary("dwmapi", .{});
         },
         .no_backend => {},
     }

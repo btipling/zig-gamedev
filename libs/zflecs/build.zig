@@ -38,8 +38,8 @@ pub fn package(
         },
     });
 
-    if (zflecs_c_cpp.target.isWindows()) {
-        zflecs_c_cpp.linkSystemLibraryName("ws2_32");
+    if (zflecs_c_cpp.target.os.tag == .windows) {
+        zflecs_c_cpp.root_module.linkSystemLibrary("ws2_32", .{});
     }
 
     return .{

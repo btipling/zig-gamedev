@@ -70,8 +70,8 @@ pub fn package(
 
         switch (target.getOs().tag) {
             .windows => {
-                ztracy_c_cpp.linkSystemLibraryName("ws2_32");
-                ztracy_c_cpp.linkSystemLibraryName("dbghelp");
+                ztracy_c_cpp.root_module.linkSystemLibrary("ws2_32", .{});
+                ztracy_c_cpp.root_module.linkSystemLibrary("dbghelp", .{});
             },
             .macos => {
                 ztracy_c_cpp.addFrameworkPath(

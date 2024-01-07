@@ -33,7 +33,7 @@ pub fn package(
     lib.linkLibC();
     if (abi != .msvc)
         lib.linkLibCpp();
-    lib.linkSystemLibraryName("imm32");
+    lib.root_module.linkSystemLibrar("imm32", .{});
 
     lib.addIncludePath(.{ .path = thisDir() ++ "/libs" });
     lib.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/imgui/imgui.cpp" }, .flags = &.{""} });

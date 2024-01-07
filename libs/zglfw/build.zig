@@ -74,20 +74,15 @@ pub fn package(
     zglfw_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/glfw/include" });
     zglfw_c_cpp.linkLibC();
 
-    const detected = try std.zig.system.NativeTargetInfo.detect(.{});
-    const host: std.Build.ResolvedTarget = .{
-        .query = .{},
-        .target = detected.target,
-        .dynamic_linker = detected.dynamic_linker,
-    };
+    const host = (zglfw_c_cpp.root_module.resolved_target orelse unreachable).result;
 
     const src_dir = thisDir() ++ "/libs/glfw/src/";
 
     switch (host.os.tag) {
         .windows => {
-            zglfw_c_cpp.linkSystemLibraryName("gdi32");
-            zglfw_c_cpp.linkSystemLibraryName("user32");
-            zglfw_c_cpp.linkSystemLibraryName("shell32");
+            zglfw_c_cpp.root_module.linkSystemLibrary("gdi32", .{});
+            zglfw_c_cpp.root_module.linkSystemLibrary("user32", .{});
+            zglfw_c_cpp.root_module.linkSystemLibrary("shell32", .{});
             zglfw_c_cpp.addCSourceFiles(.{
                 .files = &.{
                     src_dir ++ "monitor.c",
@@ -115,7 +110,7 @@ pub fn package(
             );
             zglfw_c_cpp.addSystemIncludePath(.{ .path = thisDir() ++ "/../system-sdk/macos12/usr/include" });
             zglfw_c_cpp.addLibraryPath(.{ .path = thisDir() ++ "/../system-sdk/macos12/usr/lib" });
-            zglfw_c_cpp.linkSystemLibraryName("objc");
+            zglfw_c_cpp.root_module.linkSystemLibrary("objc", .{});
             zglfw_c_cpp.linkFramework("IOKit");
             zglfw_c_cpp.linkFramework("CoreFoundation");
             zglfw_c_cpp.linkFramework("Metal");
@@ -152,7 +147,7 @@ pub fn package(
             } else {
                 zglfw_c_cpp.addLibraryPath(.{ .path = thisDir() ++ "/../system-sdk/linux/lib/aarch64-linux-gnu" });
             }
-            zglfw_c_cpp.linkSystemLibraryName("X11");
+            zglfw_c_cpp.root_module.linkSystemLibrary("X11", .{});
             zglfw_c_cpp.addCSourceFiles(.{
                 .files = &.{
                     src_dir ++ "monitor.c",
